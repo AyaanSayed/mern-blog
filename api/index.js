@@ -18,7 +18,7 @@ mongoose.connect(process.env.MONGO)
 
 app.use("/api/user", userRoute);
 
-app.use("/api/user", authRoute);
+app.use("/api/auth", authRoute);
 
 app.listen(3000, ()=>{
     console.log('Server is running on port 3000!!');
