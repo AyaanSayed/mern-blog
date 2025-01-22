@@ -92,5 +92,9 @@ export const google = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+<<<<<<< HEAD
 };
 
+=======
+};
+>>>>>>> a721fb6567957d781c92b55bafab98b85ce01422
