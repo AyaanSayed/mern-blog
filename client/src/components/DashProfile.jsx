@@ -10,7 +10,6 @@ import {
 } from "firebase/storage";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { set } from "mongoose";
 
 export default function DashProfile() {
   const { currentUser } = useSelector((state) => state.user);
