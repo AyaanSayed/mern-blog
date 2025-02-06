@@ -228,7 +228,7 @@ const handleSignout = async () => {
           onChange={handleChange}
         />
         <Button type="submit" gradientDuoTone="purpleToBlue" outline>
-          Submit
+          Update
         </Button>
       </form>
       <div className="flex justify-between mt-5 text-red-500">
