@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import { Button, Spinner } from 'flowbite-react';
 import CallToAction from '../components/CallToAction';
+import CommentSection from '../components/CommentSection';
 
 export default function PostPage() {
   const [post, setPost] = useState(null);
@@ -65,7 +66,11 @@ export default function PostPage() {
       {/* <div className='max-w-4xl mx-auto w-full'>
         <CallToAction />
       </div> */}
-      
+
+      <div>
+        <CommentSection postId={post._id} />
+      </div>
+
 
 
     </main>
