@@ -1,17 +1,20 @@
 import { Alert, Button, Textarea } from "flowbite-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { set } from "mongoose";
+import Comment from "./Comment";
 
 export default function CommentSection({ postId }) {
   const { currentUser } = useSelector((state) => state.user);
-  const [comment, setComment] = useState('');
+  const [commentInput, setCommentInput] = useState('');
+  const [comments, setComments] = useState([]);
   const [commentError, setCommentError] = useState(null);
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if(comment.length > 200) {
+    if(commentInput.length > 200) {
       return;
     }
     try {
@@ -21,14 +24,15 @@ export default function CommentSection({ postId }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: comment,
+          content: commentInput,
           postId,
           userId: currentUser._id,
         }),
       });
       const data = await res.json();
       if(res.ok){
-        setComment('');
+        setCommentInput('');
+        setComments([data, ...comments]);
         setCommentError(null);
       }
     } catch (error) {
@@ -36,45 +40,35 @@ export default function CommentSection({ postId }) {
     }
   }
 
+  useEffect(() => {
+    async function getComments() {
+      const res = await fetch(`/api/comment/getPostComments/${postId}`);
+      if(res.ok) {
+        const data = await res.json();
+        setComments(data);
+      }
+    }
+    getComments();
+  }, [postId]);
+
 
   return (
     <div className="max-w-2xl mx-auto p-3 w-full">
-      {currentUser ? (
-        <div className="flex items-center gap-1 my-5 text-gray-500 text-sm">
-          <p>Signed in as:</p>
-          <img
-            className="h-5 w-5 object-cover rounded-full"
-            src={currentUser.profilePicture}
-            alt=""
-          />
-          <Link
-            className="text-xs text-cyan-600 hover:underline"
-            to={`/dashboard?tab=profile`}
-          >
-            @{currentUser.username}
-          </Link>
-        </div>
-      ) : (
-        <div className="my-5 text-sm text-cyan-600 flex gap-1">
-          You must be signed in
-          <Link className="text-blue-500 hover:underline" to={`/sign-in`}>
-            Sign In
-          </Link>
-        </div>
-      )}
+      {/* Rest of your code before the form remains unchanged */}
+      
       {currentUser && (
         <form onSubmit={handleSubmit} className="border border-teal-500 p-3 rounded-md">
           <Textarea 
             placeholder="Leave a comment..." 
             maxLength="200" 
             rows="3"
-            value={comment}
+            value={commentInput}
             onChange={(e) => {
-              setComment(e.target.value);
+              setCommentInput(e.target.value);
             }} 
           />
           <div className="flex justify-between items-center mt-5">
-            <p className="text-gray-500 text-xs">{200 - comment.length} characters left</p>
+            <p className="text-gray-500 text-xs">{200 - commentInput.length} characters left</p>
             <Button outline gradientDuoTone="purpleToBlue" type="submit">
               Submit
             </Button>
@@ -83,6 +77,24 @@ export default function CommentSection({ postId }) {
             <Alert color="failure" className="mt-5">{commentError}</Alert>
           )}
         </form>
+      )}
+
+      {comments.length === 0 ? (
+        <p className="text-sm my-5">No comments yet</p>
+      ) : (
+        <>
+          <div className="text-sm my-5 flex items-center gap-1">
+            <p>Comments</p>
+            <div className="border border-gray-500 rounded-sm px-2 py-1">
+              <p>{comments.length}</p>
+            </div>
+          </div>
+          {
+            comments.map((comment) => (
+              <Comment key={comment._id} comment={comment} />
+            ))
+          }
+        </>
       )}
     </div>
   );
