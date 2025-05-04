@@ -54,7 +54,7 @@ export default function Header() {
    navigate(`/search?${searchQuery}`);
   }
 
-  
+
   return (
     <Navbar className="border-b-2 ">
       <Link
@@ -123,9 +123,9 @@ export default function Header() {
         <Navbar.Link active={path === "/about"} as={"div"}>
           <Link to={"/about"}>About</Link>
         </Navbar.Link>
-        <Navbar.Link active={path === "/projects"} as={"div"}>
+        {/* <Navbar.Link active={path === "/projects"} as={"div"}>
           <Link to={"/projects"}>Projects</Link>
-        </Navbar.Link>
+        </Navbar.Link> */}
       </Navbar.Collapse>
     </Navbar>
   );

@@ -21,13 +21,13 @@ export default function FooterComponent() {
             <div>
               <Footer.Title title='About' />
               <Footer.LinkGroup col>
-                <Footer.Link
+                {/* <Footer.Link
                   href='https://www.100jsprojects.com'
                   target='_blank'
                   rel='noopener noreferrer'
                 >
                   100 JS Projects
-                </Footer.Link>
+                </Footer.Link> */}
                 <Footer.Link
                   href='/about'
                   target='_blank'
@@ -69,8 +69,8 @@ export default function FooterComponent() {
           <div className="flex gap-6 sm:mt-0 mt-4 sm:justify-center">
             <Footer.Icon href='#' icon={BsFacebook}/>
             <Footer.Icon href='#' icon={BsInstagram}/>
-            <Footer.Icon href='#' icon={BsTwitter}/>
-            <Footer.Icon href='https://github.com/AyaanSayed' icon={BsGithub}/>
+            <Footer.Icon href='https://x.com/ayaansayed04' target='_blank' icon={BsTwitter}/>
+            <Footer.Icon href='https://github.com/AyaanSayed' target='_blank' icon={BsGithub}/>
             <Footer.Icon href='#' icon={BsDribbble}/>
           </div>
         </div>
