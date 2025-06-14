@@ -9,6 +9,7 @@ import postRoutes from './routes/post.route.js';
 import commentRoutes from './routes/comment.route.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import path from 'path';
 
 
 app.use(express.json());
@@ -24,6 +25,8 @@ mongoose.connect(process.env.MONGO)
     console.log('Error connecting to database!!');
 })
 
+const __dirname = path.resolve();
+
 app.use("/api/user", userRoutes);
 
 app.use("/api/auth", authRoutes);
@@ -31,6 +34,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
 
 app.use("/api/comment", commentRoutes);
+
+app.use(express.static(path.join(__dirname, '/client/dist')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client','dist', 'index.html'));
+});
+
+
 
 
 
