@@ -4,12 +4,6 @@ import { set } from "mongoose";
 import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import {useNavigate} from "react-router-dom";
@@ -21,42 +15,40 @@ export default function CreatePost() {
   const [imageUploadError, setImageUploadError] = useState(null);
   const [file, setFile] = useState(null);
   const [publishError, setPublishError] = useState(null);
+  
+
   const handleUplaodImage = async () => {
-    try {
-      if (!file) {
-        setImageUploadError("Please select an image");
-        return;
-      }
-      setImageUploadError(null);
-      const storage = getStorage(app);
-      const fileName = new Date().getTime() + file.name;
-      const storageRef = ref(storage, fileName); // updated to use fileName
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setImageUploadProgress(progress.toFixed(0));
-        },
-        (error) => {
-          setImageUploadError("Could not upload image");
-          setImageUploadProgress(null);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            setImageUploadProgress(null);
-            setImageUploadError(null);
-            setFormData({ ...formData, image: downloadURL });
-          });
-        }
-      );
-    } catch (error) {
-      setImageUploadError("Could not upload image");
-      setImageUploadProgress(null);
-      console.log(error);
+  if (!file) {
+    setImageUploadError("Please select an image");
+    return;
+  }
+
+  const imageFile = file.target.files[0];
+  const formData = new FormData();
+  formData.append('image', imageFile);
+
+  try {
+    const response = await fetch("/api/image/create", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+    console.log("Upload response:", data);
+    
+    // Use the direct imageUrl - no need for getimage endpoint
+    setFormData(prev => ({ ...prev, image: data.imageUrl }));
+    
+  } catch (error) {
+    setImageUploadError("Could not upload image");
+    setImageUploadProgress(null);
+    console.log(error);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,7 +108,7 @@ export default function CreatePost() {
             type="file"
             accept="image/*"
             onChange={(e) => {
-              setFile(e.target.files[0]);
+              setFile(e);
             }}
           />
           <Button

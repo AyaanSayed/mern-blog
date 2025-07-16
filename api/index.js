@@ -7,12 +7,16 @@ import userRoutes from './routes/user.route.js';
 import authRoutes from './routes/auth.route.js';
 import postRoutes from './routes/post.route.js';
 import commentRoutes from './routes/comment.route.js';
+import awsRoutes from './routes/aws.route.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import multer from 'multer';
+const upload = multer();
 
 
 app.use(express.json());
+app.use(upload.any()); // Use multer to handle multipart/form-data
 app.use(cookieParser());
 app.use(cors());
 
@@ -34,6 +38,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
 
 app.use("/api/comment", commentRoutes);
+
+app.use("/api/image", awsRoutes);
 
 app.use(express.static(path.join(__dirname, '/client/dist')));
 app.get('*', (req, res) => {
