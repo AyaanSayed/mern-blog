@@ -1,15 +1,7 @@
-import { app } from "../firebase.js";
 import { Alert, Button, FileInput, Select, TextInput } from "flowbite-react";
-import { set } from "mongoose";
 import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-} from "firebase/storage";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import {useNavigate, useParams} from "react-router-dom";
@@ -47,42 +39,51 @@ export default function UpdatePost() {
   const [imageUploadError, setImageUploadError] = useState(null);
   const [file, setFile] = useState(null);
   const [publishError, setPublishError] = useState(null);
-  const handleUplaodImage = async () => {
-    try {
-      if (!file) {
-        setImageUploadError("Please select an image");
-        return;
-      }
-      setImageUploadError(null);
-      const storage = getStorage(app);
-      const fileName = new Date().getTime() + file.name;
-      const storageRef = ref(storage, fileName); // updated to use fileName
-      const uploadTask = uploadBytesResumable(storageRef, file);
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          setImageUploadProgress(progress.toFixed(0));
-        },
-        (error) => {
-          setImageUploadError("Could not upload image");
-          setImageUploadProgress(null);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            setImageUploadProgress(null);
-            setImageUploadError(null);
-            setFormData({ ...formData, image: downloadURL });
-          });
-        }
-      );
-    } catch (error) {
-      setImageUploadError("Could not upload image");
-      setImageUploadProgress(null);
-      console.log(error);
+
+ 
+  const handleUploadImage = async () => {
+  try {
+    if (!file) {
+      setImageUploadError("Please select an image");
+      return;
     }
-  };
+    
+    setImageUploadError(null);
+    setImageUploadProgress(0);
+    
+    // Create FormData to send the file
+    const imageFormData = new FormData();
+    imageFormData.append('image', file);
+
+    // Upload to your S3 endpoint
+    const response = await fetch("/api/image/create", {
+      method: "POST",
+      body: imageFormData,
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    console.log("Upload response:", data);
+    
+    // Update the form data with the uploaded image URL
+    setFormData(prevFormData => ({ ...prevFormData, image: data.imageUrl }));
+    setImageUploadProgress(100);
+    
+    // Reset progress after a short delay
+    setTimeout(() => {
+      setImageUploadProgress(null);
+    }, 1000);
+    
+  } catch (error) {
+    setImageUploadError(error.message || "Could not upload image");
+    setImageUploadProgress(null);
+    console.error("Upload error:", error);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -153,7 +154,7 @@ export default function UpdatePost() {
             gradientDuoTone="purpleToBlue"
             size="sm"
             outline
-            onClick={handleUplaodImage}
+            onClick={handleUploadImage}
             disabled={imageUploadProgress}
           >
             
